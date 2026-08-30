@@ -342,7 +342,7 @@ The action sets the following outputs for preview commands:
 | `preview-id`             | The Preview resource ID                            |
 | `preview-deployment-id`  | The deployment ID within the Preview               |
 
-When `gitHubToken` is provided, the action creates a GitHub Deployment with the Preview URL linked as the environment URL and writes a job summary. For the plain `wrangler preview --json` workflow, PR comments, and cleanup examples, refer to [Automate Previews](https://developers.cloudflare.com/workers/previews/automate-previews/).
+When `gitHubToken` is provided, the action creates a GitHub Deployment with the Preview URL linked as the environment URL and writes a job summary. For the plain `wrangler preview --json` workflow, PR comments, and cleanup examples, refer to [Automation examples](https://developers.cloudflare.com/workers/previews/automation-examples/).
 
 ## Advanced Usage
 
