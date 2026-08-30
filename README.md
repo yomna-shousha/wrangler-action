@@ -284,6 +284,26 @@ gh secret set CLOUDFLARE_ACCOUNT_ID
 
 GitHub Actions provides `${{ secrets.GITHUB_TOKEN }}` automatically. You do not need to create it yourself.
 
+If you prefer plain YAML without this action, run Wrangler directly:
+
+```yaml
+name: Preview
+
+on: [pull_request]
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: npx wrangler preview --json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```
+
+Add install or build steps before `npx wrangler preview --json` if your Worker needs them. To use `wrangler-action` instead, use this workflow:
+
 ```yaml
 name: Preview
 
