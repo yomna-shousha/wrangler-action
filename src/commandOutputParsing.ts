@@ -122,10 +122,8 @@ async function handlePreviewOutputEntry(
 	config: WranglerActionConfig,
 	previewOutputEntry: OutputEntryPreview,
 ) {
-	const previewUrl =
-		previewOutputEntry.preview_urls?.[0] ?? undefined;
-	const deploymentUrl =
-		previewOutputEntry.deployment_urls?.[0] ?? undefined;
+	const previewUrl = previewOutputEntry.preview_urls?.[0] ?? undefined;
+	const deploymentUrl = previewOutputEntry.deployment_urls?.[0] ?? undefined;
 
 	// Set the primary deployment-url to the preview URL (stable branch URL)
 	setOutput("deployment-url", previewUrl);
@@ -138,10 +136,7 @@ async function handlePreviewOutputEntry(
 	setOutput("preview-deployment-id", previewOutputEntry.deployment_id);
 
 	// Create GitHub Deployment and Job Summary for the preview
-	await createPreviewGitHubDeploymentAndJobSummary(
-		config,
-		previewOutputEntry,
-	);
+	await createPreviewGitHubDeploymentAndJobSummary(config, previewOutputEntry);
 }
 
 /**

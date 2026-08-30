@@ -172,45 +172,44 @@ export async function createPreviewGitHubDeploymentAndJobSummary(
 		const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
 		const environmentName = `preview: ${previewFields.preview_name}`;
 
-		const [createDeploymentRes, createSummaryRes] =
-			await Promise.allSettled([
-				(async () => {
-					const deployment = await octokit.rest.repos.createDeployment({
-						owner: context.repo.owner,
-						repo: context.repo.repo,
-						ref: githubBranch || context.ref,
-						auto_merge: false,
-						description: "Cloudflare Workers Preview",
-						required_contexts: [],
-						environment: environmentName,
-						production_environment: false,
-					});
+		const [createDeploymentRes, createSummaryRes] = await Promise.allSettled([
+			(async () => {
+				const deployment = await octokit.rest.repos.createDeployment({
+					owner: context.repo.owner,
+					repo: context.repo.repo,
+					ref: githubBranch || context.ref,
+					auto_merge: false,
+					description: "Cloudflare Workers Preview",
+					required_contexts: [],
+					environment: environmentName,
+					production_environment: false,
+				});
 
-					if (deployment.status !== 201) {
-						info(config, "Error creating GitHub deployment for preview");
-						return;
-					}
+				if (deployment.status !== 201) {
+					info(config, "Error creating GitHub deployment for preview");
+					return;
+				}
 
-					await octokit.rest.repos.createDeploymentStatus({
-						owner: context.repo.owner,
-						repo: context.repo.repo,
-						deployment_id: deployment.data.id,
-						environment: environmentName,
-						environment_url: previewUrl,
-						production_environment: false,
-						log_url: `https://dash.cloudflare.com/${config.CLOUDFLARE_ACCOUNT_ID}/workers/services/view/${previewFields.worker_name}`,
-						description: "Cloudflare Workers Preview",
-						state: "success",
-						auto_inactive: false,
-					});
-				})(),
-				createPreviewJobSummary({
-					previewName: previewFields.preview_name,
-					previewUrl,
-					deploymentUrl,
-					workerName: previewFields.worker_name,
-				}),
-			]);
+				await octokit.rest.repos.createDeploymentStatus({
+					owner: context.repo.owner,
+					repo: context.repo.repo,
+					deployment_id: deployment.data.id,
+					environment: environmentName,
+					environment_url: previewUrl,
+					production_environment: false,
+					log_url: `https://dash.cloudflare.com/${config.CLOUDFLARE_ACCOUNT_ID}/workers/services/view/${previewFields.worker_name}`,
+					description: "Cloudflare Workers Preview",
+					state: "success",
+					auto_inactive: false,
+				});
+			})(),
+			createPreviewJobSummary({
+				previewName: previewFields.preview_name,
+				previewUrl,
+				deploymentUrl,
+				workerName: previewFields.worker_name,
+			}),
+		]);
 
 		if (createDeploymentRes.status === "rejected") {
 			warn(config, "Creating Github Deployment for preview failed");

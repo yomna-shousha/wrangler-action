@@ -272,33 +272,17 @@ jobs:
 
 ### Deploy a Workers Preview
 
-Workers Previews let you test non-production branches in isolated environments with their own URLs, variables, secrets, and bindings. Use `wrangler preview` instead of `wrangler deploy` for any branch that isn't your production branch.
+Workers Previews let you test non-production branches with their own URLs, variables, secrets, and bindings. Use `command: preview` instead of the default `deploy` command.
 
-The recommended setup uses two workflows: one for production deploys on `main`, and one for preview deploys on all other branches:
+Before using this workflow, add your Cloudflare credentials as GitHub Actions secrets:
 
-**Production deploy** (`.github/workflows/deploy.yml`):
-
-```yaml
-name: Deploy
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Deploy to production
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```sh
+gh auth login
+gh secret set CLOUDFLARE_API_TOKEN
+gh secret set CLOUDFLARE_ACCOUNT_ID
 ```
 
-**Preview deploy** (`.github/workflows/preview.yml`):
+GitHub Actions provides `${{ secrets.GITHUB_TOKEN }}` automatically. You do not need to create it yourself.
 
 ```yaml
 name: Preview
@@ -309,12 +293,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
   deployments: write
-
-concurrency:
-  group: preview-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
 
 jobs:
   preview:
@@ -330,56 +309,20 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: preview
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Comment preview URL on PR
-        uses: actions/github-script@v7
-        env:
-          PREVIEW_URL: ${{ steps.preview.outputs.preview-url }}
-        with:
-          script: |
-            const marker = '<!-- cloudflare-worker-preview -->';
-            const body = `${marker}\n### Cloudflare Workers Preview\n- Preview: ${process.env.PREVIEW_URL}`;
-            const { owner, repo } = context.repo;
-            const issue_number = context.issue.number;
-            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
-            const existing = comments.find(c => c.user?.type === 'Bot' && c.body?.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
-            } else {
-              await github.rest.issues.createComment({ owner, repo, issue_number, body });
-            }
-
-  cleanup:
-    if: github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Delete preview
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: preview delete --skip-confirmation
 ```
 
 The action sets the following outputs for preview commands:
 
-| Output                  | Description                                               |
-| ----------------------- | --------------------------------------------------------- |
-| `deployment-url`        | The stable preview URL (same as `preview-url`)            |
-| `preview-url`           | The stable preview URL for the branch                     |
-| `preview-deployment-url`| The immutable URL for this specific deployment            |
-| `preview-name`          | The preview name (defaults to the git branch name)        |
-| `preview-id`            | The preview resource ID                                   |
-| `preview-deployment-id` | The deployment ID within the preview                      |
+| Output                   | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `deployment-url`         | The stable preview URL (same as `preview-url`)     |
+| `preview-url`            | The stable Preview URL for the branch              |
+| `preview-deployment-url` | The immutable URL for this specific deployment     |
+| `preview-name`           | The Preview name (defaults to the git branch name) |
+| `preview-id`             | The Preview resource ID                            |
+| `preview-deployment-id`  | The deployment ID within the Preview               |
 
-When `gitHubToken` is provided, the action creates a GitHub Deployment with the preview URL linked as the environment URL. The workflow above also:
-
-- **Comments the preview URL on the PR** so reviewers can find it immediately
-- **Cleans up previews** when the PR is closed or merged
-- **Cancels in-progress deploys** for the same PR using concurrency groups
-
-For more on Workers Previews, see the [Workers Previews documentation](https://developers.cloudflare.com/workers/previews/).
+When `gitHubToken` is provided, the action creates a GitHub Deployment with the Preview URL linked as the environment URL and writes a job summary. For the plain `wrangler preview --json` workflow, PR comments, and cleanup examples, refer to [Automate Previews](https://developers.cloudflare.com/workers/previews/automate-previews/).
 
 ## Advanced Usage
 
