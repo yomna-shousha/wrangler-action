@@ -1,0 +1,23 @@
+README.md
+  s_3c1cb26928f0ef::t_5a70fd09ce4a43 275,277,279-282,285,316-323,325
+src/commandOutputParsing.ts
+  s_3c1cb26928f0ef::t_846a25a6effc7f 125-126,139
+src/service/github.ts
+  s_3c1cb26928f0ef::t_735bc54050c7ad 175-212
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4fd4b6e848038ea0e841cca7da5db0f73b8cb527",
+  "prompts": {},
+  "sessions": {
+    "s_3c1cb26928f0ef": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fabe742defferGZC8KY3lgs0Q7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yomna <yomna@cloudflare.com>"
+    }
+  }
+}
