@@ -197,7 +197,9 @@ export async function createPreviewGitHubDeploymentAndJobSummary(
 					environment: environmentName,
 					environment_url: previewUrl,
 					production_environment: false,
-					log_url: `https://dash.cloudflare.com/${config.CLOUDFLARE_ACCOUNT_ID}/workers/services/view/${previewFields.worker_name}`,
+					log_url: previewFields.worker_name
+						? `https://dash.cloudflare.com/${config.CLOUDFLARE_ACCOUNT_ID}/workers/services/view/${previewFields.worker_name}`
+						: `https://dash.cloudflare.com/${config.CLOUDFLARE_ACCOUNT_ID}/workers`,
 					description: "Cloudflare Workers Preview",
 					state: "success",
 					auto_inactive: false,
